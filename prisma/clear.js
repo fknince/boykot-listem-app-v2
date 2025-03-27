@@ -3,10 +3,11 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
-  await prisma.boycottOperation.deleteMany()
+  // İlişkili verilerden başlayarak silme işlemi yapılmalı
+  await prisma.boycottListBrand.deleteMany()
+  await prisma.boycottList.deleteMany()
   await prisma.brand.deleteMany()
   await prisma.user.deleteMany()
-  await prisma.boycottSettings.deleteMany()
 
   console.log('🧹 Veritabanı temizlendi.')
 }
