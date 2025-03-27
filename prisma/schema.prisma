@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    String        @id @default(uuid())
+  email                 String        @unique
+  loginProvider         LoginProvider
+  createdAt             DateTime      @default(now())
+  lastLoginAt           DateTime?
+  refreshToken          String?
+  refreshTokenExpiresAt DateTime?
+
+  boycottLists  BoycottList[]
+  createdBrands Brand[]       @relation("CreatedBrands")
+  updatedBrands Brand[]       @relation("UpdatedBrands")
+}
+
+model Brand {
+  id              String  @id @default(uuid())
+  name            String
+  sector          String
+  subSector       String?
+  owner           String?
+  description     String?
+  logoUrl         String?
+  twitterUsername String?
+
+  createdAt   DateTime @default(now())
+  createdBy   User?    @relation("CreatedBrands", fields: [createdById], references: [id])
+  createdById String?
+
+  updatedAt   DateTime?
+  updatedBy   User?     @relation("UpdatedBrands", fields: [updatedById], references: [id])
+  updatedById String?
+
+  listedIn BoycottListBrand[]
+}
+
+model BoycottList {
+  id        String    @id @default(uuid())
+  title     String
+  user      User      @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+
+  brands BoycottListBrand[]
+}
+
+model BoycottListBrand {
+  id            String      @id @default(uuid())
+  boycottList   BoycottList @relation(fields: [boycottListId], references: [id])
+  boycottListId String
+  brand         Brand       @relation(fields: [brandId], references: [id])
+  brandId       String
+  addedAt       DateTime    @default(now())
+
+  @@unique([boycottListId, brandId])
+}
+
+enum LoginProvider {
+  google
+  microsoft
+}
